@@ -33,7 +33,7 @@ HF_TOKEN = os.environ.get("HF_TOKEN", "")
 # Environment URL (the deployed HF Space)
 ENV_URL = os.environ.get(
     "ENV_URL",
-    "https://SAI-RAHUL-ROKKAM-bug-report-structuring-env.hf.space"
+    "https://rahul-13-bug-report-structuring-env.hf.space"
 )
 
 BENCHMARK_NAME = "bug_report_structuring"
