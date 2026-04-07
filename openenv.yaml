@@ -1,0 +1,99 @@
+name: bug_report_structuring
+description: >
+  An OpenEnv environment that challenges LLM agents to convert messy,
+  unstructured bug reports into well-organized structured formats.
+  Tests extraction, classification, and structuring capabilities.
+
+version: "1.0.0"
+author: SAI-RAHUL-ROKKAM
+
+environment:
+  type: text
+  interface: http
+  endpoints:
+    reset: POST /reset
+    step: POST /step
+    state: GET /state
+    health: GET /health
+
+tasks:
+  - id: easy
+    name: Simple Bug Report
+    description: >
+      Single clear bug with all information present but poorly formatted.
+      Login button freeze on Chrome.
+    difficulty: easy
+    max_steps: 3
+
+  - id: medium
+    name: Multi-Symptom Bug Report
+    description: >
+      Multiple symptoms with ambiguity and partial information.
+      Search results stale, filter broken, HTML rendering issue.
+    difficulty: medium
+    max_steps: 4
+
+  - id: hard
+    name: Compound Technical Report
+    description: >
+      Multiple distinct bugs with detailed technical information.
+      Analytics dashboard with 3 separate issues requiring decomposition.
+    difficulty: hard
+    max_steps: 5
+
+scoring:
+  type: weighted_average
+  range: [0.0, 1.0]
+  dimensions:
+    - name: title
+      weight: 0.15
+      description: Clear, descriptive bug title
+    - name: steps_to_reproduce
+      weight: 0.25
+      description: Complete step-by-step reproduction instructions
+    - name: expected_behavior
+      weight: 0.15
+      description: Accurate expected behavior description
+    - name: actual_behavior
+      weight: 0.15
+      description: Accurate actual behavior description
+    - name: severity
+      weight: 0.15
+      description: Correct severity classification
+    - name: environment
+      weight: 0.10
+      description: Platform and version details
+    - name: format
+      weight: 0.05
+      description: Structural completeness
+
+action_schema:
+  type: object
+  properties:
+    title:
+      type: string
+      description: Clear, concise bug title
+    steps_to_reproduce:
+      type: string
+      description: Numbered reproduction steps
+    expected_behavior:
+      type: string
+      description: What should happen
+    actual_behavior:
+      type: string
+      description: What actually happens
+    severity:
+      type: string
+      enum: [low, medium, high, critical]
+    environment:
+      type: string
+      description: OS, browser, version info
+    additional_notes:
+      type: string
+      description: Any other relevant details
+
+deployment:
+  platform: huggingface_spaces
+  sdk: docker
+  port: 7860
+  hardware: cpu-basic
