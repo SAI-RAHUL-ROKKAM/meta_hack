@@ -23,6 +23,20 @@ import json
 import time
 import requests
 from openai import OpenAI
+from pathlib import Path
+
+# ─── Load Environment Variables from .env if it exists ───────────
+env_file = Path(__file__).parent / ".env"
+if env_file.exists():
+    with open(env_file) as f:
+        for line in f:
+            line = line.strip()
+            if line and not line.startswith("#"):
+                key, _, value = line.partition("=")
+                key = key.strip()
+                value = value.strip()
+                if key and value:
+                    os.environ.setdefault(key, value)
 
 # ─── Configuration ────────────────────────────────────────────────
 
