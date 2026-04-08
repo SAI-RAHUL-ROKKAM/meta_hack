@@ -12,6 +12,7 @@ COPY tasks.py .
 COPY graders.py .
 COPY environment.py .
 COPY app.py .
+COPY server/ ./server/
 
 # HF Spaces expects port 7860
 EXPOSE 7860
