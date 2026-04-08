@@ -26,23 +26,60 @@ from openai import OpenAI
 from pathlib import Path
 
 # ─── Load Environment Variables from .env if it exists ───────────
-env_file = Path(__file__).parent / ".env"
-if env_file.exists():
-    with open(env_file) as f:
-        for line in f:
-            line = line.strip()
-            if line and not line.startswith("#"):
-                key, _, value = line.partition("=")
-                key = key.strip()
-                value = value.strip()
-                if key and value:
-                    os.environ.setdefault(key, value)
+def load_env_file():
+    """Try to load .env file from multiple locations."""
+    possible_paths = [
+        Path(__file__).parent / ".env",  # Same dir as script
+        Path.cwd() / ".env",              # Current working directory
+        Path.home() / ".env",              # Home directory
+    ]
+    
+    for env_path in possible_paths:
+        if env_path.exists():
+            try:
+                with open(env_path) as f:
+                    for line in f:
+                        line = line.strip()
+                        if line and not line.startswith("#"):
+                            key, _, value = line.partition("=")
+                            key = key.strip()
+                            value = value.strip()
+                            if key and value:
+                                os.environ.setdefault(key, value)
+                return
+            except Exception:
+                continue
+
+load_env_file()
 
 # ─── Configuration ────────────────────────────────────────────────
 
-API_BASE_URL = os.environ.get("API_BASE_URL", "")
-MODEL_NAME = os.environ.get("MODEL_NAME", "")
-HF_TOKEN = os.environ.get("HF_TOKEN", "")
+API_BASE_URL = os.environ.get("API_BASE_URL", "").strip()
+MODEL_NAME = os.environ.get("MODEL_NAME", "").strip()
+HF_TOKEN = os.environ.get("HF_TOKEN", "").strip()
+
+# ─── Validate Required Environment Variables ──────────────────────
+
+required_vars = {
+    "API_BASE_URL": API_BASE_URL,
+    "MODEL_NAME": MODEL_NAME,
+    "HF_TOKEN": HF_TOKEN,
+}
+
+missing_vars = [var for var, value in required_vars.items() if not value]
+if missing_vars:
+    print(
+        f"❌ Missing environment variables: {', '.join(missing_vars)}",
+        file=sys.stderr,
+    )
+    print(
+        f"\nSet them before running:",
+        file=sys.stderr,
+    )
+    print(f"export API_BASE_URL=https://...", file=sys.stderr)
+    print(f"export MODEL_NAME=meta-llama/...", file=sys.stderr)
+    print(f"export HF_TOKEN=hf_...", file=sys.stderr)
+    sys.exit(1)
 
 # Environment URL (the deployed HF Space)
 ENV_URL = os.environ.get(
