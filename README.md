@@ -39,21 +39,71 @@ Bug reports in the wild are often poorly written — missing steps, ambiguous de
 | `GET` | `/health` | Health check |
 | `GET` | `/docs` | Interactive API documentation |
 
-## Action Schema
+## Action Space
 
-The agent submits a structured bug report as JSON:
+The agent submits a structured bug report as a JSON object via `POST /step`:
 
 ```json
 {
-  "title": "Clear, concise bug title",
-  "steps_to_reproduce": "1. Step one\n2. Step two\n...",
-  "expected_behavior": "What should happen",
-  "actual_behavior": "What actually happens",
-  "severity": "low|medium|high|critical",
-  "environment": "OS, browser, version info",
-  "additional_notes": "Any other relevant details"
+  "action": {
+    "title": "Clear, concise bug title",
+    "steps_to_reproduce": "1. Step one\n2. Step two\n...",
+    "expected_behavior": "What should happen",
+    "actual_behavior": "What actually happens",
+    "severity": "low|medium|high|critical",
+    "environment": "OS, browser, version info",
+    "additional_notes": "Any other relevant details"
+  }
 }
 ```
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `title` | string | Clear, concise summary of the bug |
+| `steps_to_reproduce` | string | Numbered step-by-step reproduction instructions |
+| `expected_behavior` | string | What the correct behavior should be |
+| `actual_behavior` | string | What actually happens (the bug) |
+| `severity` | string | One of: `low`, `medium`, `high`, `critical` |
+| `environment` | string | OS, browser, version, platform details |
+| `additional_notes` | string | Any other relevant information |
+
+## Observation Space
+
+After each `reset()` or `step()`, the environment returns an observation:
+
+```json
+{
+  "raw_report": "The messy, unstructured bug report text...",
+  "feedback": "Grading feedback explaining the score",
+  "score": 0.85,
+  "field_scores": {
+    "title": 1.0,
+    "steps_to_reproduce": 0.75,
+    "expected_behavior": 0.5,
+    "actual_behavior": 0.8,
+    "severity": 1.0,
+    "environment": 1.0,
+    "format": 0.83
+  },
+  "done": false,
+  "reward": 0.85,
+  "step_count": 1,
+  "task_id": "easy",
+  "max_steps": 3
+}
+```
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `raw_report` | string | The original messy bug report to structure |
+| `feedback` | string | Human-readable grading feedback |
+| `score` | float | Overall score from 0.0 to 1.0 |
+| `field_scores` | dict | Per-field scores (0.0–1.0 each) |
+| `done` | bool | Whether the episode is complete |
+| `reward` | float | Reward signal for this step |
+| `step_count` | int | Current step number |
+| `task_id` | string | Current task identifier |
+| `max_steps` | int | Maximum steps allowed |
 
 ## Scoring
 
